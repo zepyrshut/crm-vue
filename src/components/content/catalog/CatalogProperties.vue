@@ -1,0 +1,3 @@
+<template>
+  catalog properties
+</template>
