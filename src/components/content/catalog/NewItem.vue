@@ -29,7 +29,7 @@
 
           <div class="col-span-6 sm:col-span-2">
             <label for="buy-price" class="block text-sm font-medium text-gray-700">Precio</label>
-            <input type="text" name="buy-price" id="buy-price" v-model="this.item.buy_price"
+            <input type="text" name="buy-price" id="buy-price" v-model="this.item.buyPrice"
               class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" />
           </div>
 
@@ -39,10 +39,10 @@
             <label for="tax" class="block text-sm font-medium text-gray-700">Tipo de IVA</label>
             <select id="tax" name="tax" v-model="this.item.tax"
               class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-              <option>General</option>
-              <option>Reducido</option>
-              <option>Superreducido</option>
-              <option>Exento</option>
+              <option value="1">General</option>
+              <option value="2">Reducido</option>
+              <option value="3">Superreducido</option>
+              <option value="4">Exento</option>
             </select>
 
           </div>
@@ -61,28 +61,29 @@
 
 
             <div v-if="!this.disabledCategories">
-              <select id="category" name="category" v-model="this.item.category_id"
+              <select id="category" name="category" v-model="this.item.itemCategory.id"
                 class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                <option value="0">- Sin categoría -</option>
                 <option v-for="items in this.categories" :value="items.id">{{ items.name }}</option>
               </select>
             </div>
-
 
             <div v-else>
               <input type="text" name="" id=""
                 class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md bg-gray-200"
                 disabled />
             </div>
+
+            <span> {{ this.item.itemCategory.id }}</span>
           </div>
-
-
 
           <div class="col-span-6 sm:col-span-2">
             <label for="family" class="block text-sm font-medium text-gray-700">Familia</label>
 
             <div v-if="!this.disabledFamilies">
-              <select id="family" name="family" v-model="this.item.family_id"
+              <select id="family" name="family" v-model="this.item.itemFamily.id"
                 class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                <option value="0">- Sin familia -</option>
                 <option v-for="items in this.families" :value="items.id">{{ items.name }}</option>
               </select>
             </div>
@@ -93,6 +94,8 @@
                 disabled />
             </div>
 
+            <span> {{ this.item.itemFamily.id }}</span>
+
           </div>
 
 
@@ -101,8 +104,9 @@
 
 
             <div v-if="!this.disabledTypes">
-              <select id="type" name="type" v-model="this.item.type_id"
+              <select id="type" name="type" v-model="this.item.itemType.id"
                 class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                <option value="0">- Sin tipo -</option>
                 <option v-for="items in this.types" :value="items.id">{{ items.name }}</option>
               </select>
 
@@ -155,7 +159,6 @@
 <script>
 
 import axios from 'axios';
-import qs from 'qs';
 
 export default {
   data() {
@@ -163,12 +166,17 @@ export default {
       item: {
         name: '',
         description: '',
-        //tax: '',
-        buy_price: '',
+        buyPrice: '',
         code: '',
-        category_id: '',
-        // family_id: '',
-        // type_id: '',
+        itemCategory: {
+          id: 0,
+        },
+        itemFamily: {
+          id: 0,
+        },
+        itemType: {
+          id: 0,
+        }
       },
       categories: {},
       families: {},
@@ -179,7 +187,7 @@ export default {
     }
   },
   beforeMount() {
-    fetch("http://localhost:8080/api/properties/categories")
+    fetch("http://localhost:8081/api/properties/categories")
       .then(response => response.json())
       .then(response => {
         if (this.error || response.data.length == 0) {
@@ -193,7 +201,7 @@ export default {
         this.$emit('error', error);
       })
 
-    fetch("http://localhost:8080/api/properties/families")
+    fetch("http://localhost:8081/api/properties/families")
       .then(response => response.json())
       .then(response => {
         if (this.error || response.data.length == 0) {
@@ -205,7 +213,7 @@ export default {
         }
       })
 
-    fetch("http://localhost:8080/api/properties/types")
+    fetch("http://localhost:8081/api/properties/types")
       .then(response => response.json())
       .then(response => {
         if (this.error || response.data.length == 0) {
@@ -221,7 +229,9 @@ export default {
   },
   methods: {
     submitForm() {
-      axios.post("http://localhost:8080/api/item/save", this.item)
+      console.log(this.item)
+      console.log(this.ejemplo)
+      axios.post("http://localhost:8081/api/item/save", this.item)
         .then(response => {
           if (response.data.success) {
             this.$emit('success', response.data.message);
@@ -236,39 +246,5 @@ export default {
     }
   }
 }
-
-    // submitForm() {
-    //   const payload = {
-    //     name: this.item.name,
-    //     description: this.item.description,
-    //     buy_price: this.item.buy_price,
-    //     tax: this.item.tax,
-    //     code: this.item.code,
-    //     category_id: this.item.category_id,
-    //     family_id: this.item.family_id,
-    //     type_id: this.item.type_id,
-    //   }
-
-    //   fetch("http://localhost:8080/api/item/save", {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json'
-    //     },
-    //     body: JSON.stringify(payload)
-    //   })
-    //     .then(response => response.json())
-    //     .then(response => {
-    //       if (this.error || response.data.length == 0) {
-    //         this.$emit('error', response.message);
-    //       } else {
-    //         this.$emit('success', response.message);
-    //       }
-    //     })
-    //     .catch(error => {
-    //       this.$emit('error', error);
-    //     })
-    // }
-
-
 
 </script>

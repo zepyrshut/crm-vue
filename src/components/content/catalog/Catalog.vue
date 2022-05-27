@@ -112,7 +112,7 @@ export default {
   },
   emits: ['error'],
   beforeMount() {
-    fetch("http://localhost:8080/api/item/catalog")
+    fetch("http://localhost:8081/api/item/catalog")
       .then((response) => response.json())
       .then((response) => {
         if (this.error) {
