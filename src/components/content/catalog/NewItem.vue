@@ -61,7 +61,7 @@
 
 
             <div v-if="!this.disabledCategories">
-              <select id="category" name="category" v-model="this.item.itemCategory.id"
+              <select id="category" name="category" v-model="this.item.itemCategory"
                 class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
                 <option value="0">- Sin categoría -</option>
                 <option v-for="items in this.categories" :value="items.id">{{ items.name }}</option>
@@ -81,7 +81,7 @@
             <label for="family" class="block text-sm font-medium text-gray-700">Familia</label>
 
             <div v-if="!this.disabledFamilies">
-              <select id="family" name="family" v-model="this.item.itemFamily.id"
+              <select id="family" name="family" v-model="this.item.itemFamily"
                 class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
                 <option value="0">- Sin familia -</option>
                 <option v-for="items in this.families" :value="items.id">{{ items.name }}</option>
@@ -104,7 +104,7 @@
 
 
             <div v-if="!this.disabledTypes">
-              <select id="type" name="type" v-model="this.item.itemType.id"
+              <select id="type" name="type" v-model="this.item.itemType"
                 class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
                 <option value="0">- Sin tipo -</option>
                 <option v-for="items in this.types" :value="items.id">{{ items.name }}</option>
@@ -151,13 +151,11 @@
       </form>
 
 
-
     </div>
   </div>
 </template>
 
 <script>
-
 import axios from 'axios';
 
 export default {
@@ -168,15 +166,9 @@ export default {
         description: '',
         buyPrice: '',
         code: '',
-        itemCategory: {
-          id: 0,
-        },
-        itemFamily: {
-          id: 0,
-        },
-        itemType: {
-          id: 0,
-        }
+        itemCategory: 0,
+        itemFamily: 0,
+        itemType: 0,
       },
       categories: {},
       families: {},
@@ -184,6 +176,7 @@ export default {
       disabledCategories: false,
       disabledFamilies: false,
       disabledTypes: false,
+      success: false,
     }
   },
   beforeMount() {
@@ -229,21 +222,15 @@ export default {
   },
   methods: {
     submitForm() {
-      console.log(this.item)
-      console.log(this.ejemplo)
       axios.post("http://localhost:8081/api/item/save", this.item)
         .then(response => {
-          if (response.data.success) {
-            this.$emit('success', response.data.message);
-            this.$router.push('/catalog');
+          if (response.status == 201) {
+            // Aqui disparar el mensaje de alerta
           } else {
-            this.$emit('error', response.data.message);
+            // Aqui otro mensaje
           }
         })
-        .catch(error => {
-          this.$emit('error', error);
-        })
-    }
+    },
   }
 }
 
